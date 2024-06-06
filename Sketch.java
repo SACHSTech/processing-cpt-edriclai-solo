@@ -60,7 +60,7 @@ public class Sketch extends PApplet {
   public void settings() {
     size(1000, 600);
   }
-
+  
   /**
    * called once
    * setup functions
@@ -87,12 +87,13 @@ public class Sketch extends PApplet {
    * draw function
    */
   public void draw() {
-    clear();
+    //clear();
+    disintegrate();
     noStroke();
     enemyMain();
     inputsMain();
   }
-  
+
   /**
    * called in draw
    * enemy main code
@@ -102,27 +103,26 @@ public class Sketch extends PApplet {
       ObjEnemy indivEnemy = arrListEnemy.get(i);
       // health
       if (indivEnemy.intHealth <= 0) {
+        fill(255, 0, 0);
+        ellipse(indivEnemy.fltPosX, indivEnemy.fltPosY, indivEnemy.fltDia * 3, indivEnemy.fltDia * 3);
         arrListEnemy.remove(i);
       }
-      // sprite
+      // vfx
+      fill(255, 255, 255);
       ellipse(indivEnemy.fltPosX, indivEnemy.fltPosY, indivEnemy.fltDia, indivEnemy.fltDia);
-      /*
-      movement
-      follows cursor
-      */
-      // get distance
+      // movement: get distance
       indivEnemy.dblDistX = mouseX - indivEnemy.fltPosX;
       indivEnemy.dblDistY = mouseY - indivEnemy.fltPosY;
-      // get vector
+      // movement: get vector
       indivEnemy.dblVector = Math.sqrt(Math.pow(indivEnemy.dblDistX, 2) + Math.pow(indivEnemy.dblDistY, 2));
       indivEnemy.dblDx = (indivEnemy.fltSpeed / indivEnemy.dblVector) * indivEnemy.dblDistX;
       indivEnemy.dblDy = (indivEnemy.fltSpeed / indivEnemy.dblVector) * indivEnemy.dblDistY;
-      // apply vector
+      // movement: apply vector
       indivEnemy.fltPosX += indivEnemy.dblDx;
       indivEnemy.fltPosY += indivEnemy.dblDy;
     }
   }
-  
+
   /**
    * called in draw
    * inputs
@@ -142,25 +142,31 @@ public class Sketch extends PApplet {
     }
     // when record reaches limit
     if (strInputs.length() >= 3) {
-      /*
-      input combo (wws)
-      meteor
-      */
+      // input combo (wws): meteor
       if (strInputs.equals("wws")) {
         //
       }
-      /*
-      input combo (sss)
-      lightning
-      */
+      // input combo (sss): lightning
       else if (strInputs.equals("sss")) {
         // runtime
         if (intDelayTimer < 0) {intDelayTimer = 40;}
-        // strikes enemies 3 times
+        // strikes 3 times
         if (intDelayTimer % 20 == 0) {
-          ObjEnemy indivEnemy = arrListEnemy.get((int) random(arrListEnemy.size()));
+          // local variables
+          int highestHealth = 0;
+          int targetIndex = 0;
+          // finds highest hp
+          for (int i = 0; i < arrListEnemy.size(); i++) {
+            ObjEnemy indivEnemy = arrListEnemy.get(i);
+            if (highestHealth < indivEnemy.intHealth) {
+              highestHealth = indivEnemy.intHealth;
+              targetIndex = i;
+            }
+          }
+          // strikes target
+          ObjEnemy indivEnemy = arrListEnemy.get(targetIndex);
           lightning(indivEnemy.fltPosX, indivEnemy.fltPosY);
-          indivEnemy.intHealth -= 10;
+          indivEnemy.intHealth -= 20;
         }
       }
       // resets record
@@ -168,28 +174,6 @@ public class Sketch extends PApplet {
         strInputs = "";
       }
     }
-  }
-
-  /**
-   * called on key pressed
-   * keyPressed function
-  */
-  public void keyPressed() {
-    if (key == 'w') {boolW = true;}
-    else if (key == 'a') {boolA = true;}
-    else if (key == 's') {boolS = true;}
-    else if (key == 'd') {boolD = true;}
-  }
-
-  /**
-   * called on key released
-   * keyReleased function
-  */
-  public void keyReleased() {
-    if (key == 'w') {boolW = false;}
-    else if (key == 'a') {boolA = false;}
-    else if (key == 's') {boolS = false;}
-    else if (key == 'd') {boolD = false;}
   }
 
   /**
@@ -239,5 +223,38 @@ public class Sketch extends PApplet {
         }
       }
     }
+  }
+
+  /**
+   * called in draw
+   * disintegrate effect
+  */
+  private void disintegrate() {
+    for (int i = 0; i < 30; i++) {
+      stroke(0, 0, 0);
+      line(random(width), random(height), random(width), random(height));
+    }
+  }
+
+  /**
+   * called on key pressed
+   * keyPressed function
+  */
+  public void keyPressed() {
+    if (key == 'w') {boolW = true;}
+    else if (key == 'a') {boolA = true;}
+    else if (key == 's') {boolS = true;}
+    else if (key == 'd') {boolD = true;}
+  }
+
+  /**
+   * called on key released
+   * keyReleased function
+  */
+  public void keyReleased() {
+    if (key == 'w') {boolW = false;}
+    else if (key == 'a') {boolA = false;}
+    else if (key == 's') {boolS = false;}
+    else if (key == 'd') {boolD = false;}
   }
 }
