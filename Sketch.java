@@ -22,13 +22,15 @@ public class Sketch extends PApplet {
     float fltPosY;
     float fltDia;
     float fltSpeed;
+    float fltOrigSpeed;
     int intHealth;
     // constructor
     public ObjEnemy() {
       this.fltPosX = random(width);
-      this.fltPosY = random(height);
+      this.fltPosY = 0;
       this.fltDia = random(fltSize / 50000, fltSize / 10000);
-      this.fltSpeed = random(fltSize / 500000, fltSize / 100000);
+      this.fltSpeed = random(fltSize / 500000, fltSize / 50000);
+      this.fltOrigSpeed = fltSpeed;
       this.intHealth = (int) (fltDia * intLevel);
     }
   }
@@ -60,7 +62,7 @@ public class Sketch extends PApplet {
   public void settings() {
     size(1000, 600);
   }
-  
+
   /**
    * called once
    * setup functions
@@ -77,14 +79,13 @@ public class Sketch extends PApplet {
     strokeWeight(fltSize / 200000);
     textSize(fltSize / 20000);
   }
-  
+
   /**
    * called repeatedly
    * draw function
    */
   public void draw() {
-    //clear();
-    disintegrate();
+    clear();
     noStroke();
     enemyMain();
     levelsMain();
@@ -98,19 +99,11 @@ public class Sketch extends PApplet {
   private void enemyMain() {
     for (int i = 0; i < arrListEnemy.size(); i++) {
       ObjEnemy indivEnemy = arrListEnemy.get(i);
-      // health
-      if (indivEnemy.intHealth <= 0) {
-        explosion(indivEnemy);
-        arrListEnemy.remove(i);
-      }
       // vfx
       fill(255, 255, 255);
       ellipse(indivEnemy.fltPosX, indivEnemy.fltPosY, indivEnemy.fltDia, indivEnemy.fltDia);
-      // collision
-      if (dist(mouseX, mouseY, indivEnemy.fltPosX, indivEnemy.fltPosY) < indivEnemy.fltDia) {
-        explosion(indivEnemy);
-        arrListEnemy.remove(i);
-      }
+      // death conditions
+      if (indivEnemy.intHealth <= 0 || dist(mouseX, mouseY, indivEnemy.fltPosX, indivEnemy.fltPosY) < indivEnemy.fltDia) {explosion(indivEnemy);}
       // movement: get distance
       indivEnemy.dblDistX = mouseX - indivEnemy.fltPosX;
       indivEnemy.dblDistY = mouseY - indivEnemy.fltPosY;
@@ -128,17 +121,19 @@ public class Sketch extends PApplet {
    * called on command
    * explosion
   */
-  private void explosion(ObjEnemy explodingEnemy) {
+  private void explosion(ObjEnemy explEnemy) {
     // vfx
     fill(255, 0, 0);
-    ellipse(explodingEnemy.fltPosX, explodingEnemy.fltPosY, explodingEnemy.fltDia * 3, explodingEnemy.fltDia * 3);
-    // damages nearby allies
+    ellipse(explEnemy.fltPosX, explEnemy.fltPosY, explEnemy.fltDia * 3, explEnemy.fltDia * 3);
+    // collateral damage
     for (int i = 0; i < arrListEnemy.size(); i++) {
       ObjEnemy indivEnemy = arrListEnemy.get(i);
-      if (dist(indivEnemy.fltPosX, indivEnemy.fltPosY, explodingEnemy.fltPosX, explodingEnemy.fltPosY) < indivEnemy.fltDia + explodingEnemy.fltDia * 3) {
+      if (dist(indivEnemy.fltPosX, indivEnemy.fltPosY, explEnemy.fltPosX, explEnemy.fltPosY) < indivEnemy.fltDia + explEnemy.fltDia * 3) {
         indivEnemy.intHealth -= 20;
       }
     }
+    // remove from list
+    arrListEnemy.remove(explEnemy);
   }
 
   /**
@@ -148,18 +143,12 @@ public class Sketch extends PApplet {
   private void levelsMain(){
     // display level count
     text("Level " + intLevel, fltGuiX, fltGuiY * 1.5f);
-    // when enemy count drops to 0
+    // when 0 enemies
     if (arrListEnemy.size() <= 0) {
       // creates new level
       intLevel += 1;
       for (int i = 0; i < (random(10) * intLevel); i++) {
         arrListEnemy.add(new ObjEnemy());
-      }
-      // spawn vfx
-      for (int i = 0; i < arrListEnemy.size(); i++) {
-        ObjEnemy indivEnemy = arrListEnemy.get(i);
-        fill(0, 255, 255);
-        ellipse(indivEnemy.fltPosX, indivEnemy.fltPosY, indivEnemy.fltDia * 3, indivEnemy.fltDia * 3);
       }
     }
   }
@@ -183,12 +172,18 @@ public class Sketch extends PApplet {
     }
     // when record reaches limit
     if (strInputs.length() >= 3) {
-      // input combo (wws): meteor
-      if (strInputs.equals("wws")) {
-        //
+      // input combo (sss): freeze
+      if (strInputs.equals("sss")) {
+        // runtime
+        if (intDelayTimer < 0) {intDelayTimer = 100;}
+        // freezes targets
+        for (int i = 0; i < arrListEnemy.size(); i++) {
+          ObjEnemy indivEnemy = arrListEnemy.get(i);
+          freeze(indivEnemy);
+        }
       }
-      // input combo (sss): lightning
-      else if (strInputs.equals("sss")) {
+      // input combo (wss): lightning
+      else if (strInputs.equals("wss")) {
         // runtime
         if (intDelayTimer < 0) {intDelayTimer = 40;}
         // strikes 3 times
@@ -219,10 +214,25 @@ public class Sketch extends PApplet {
 
   /**
    * called on command
-   * meteor
+   * freeze
+   * @param target  freezes target
   */
-  private void meteor() {
-    //
+  private void freeze(ObjEnemy target) {
+    // vfx
+    for (int i = 0; i < 10; i++) {
+      // local variables
+      float posX = target.fltPosX + random(-target.fltDia / 2, target.fltDia / 2);
+      float posY = target.fltPosY + random(-target.fltDia / 2, target.fltDia / 2);
+      // particles
+      fill(0, 255, 255);
+      ellipse(posX, posY, target.fltDia / 10, target.fltDia / 10);
+    }
+    // slows movement
+    target.fltSpeed /= 1.05;
+    // restores speed after duration
+    if (intDelayTimer <= 0) {
+      target.fltSpeed = target.fltOrigSpeed;
+    }
   }
 
   /**
@@ -263,18 +273,6 @@ public class Sketch extends PApplet {
           bposY = bposY2;
         }
       }
-    }
-  }
-
-  /**
-   * called in draw
-   * disintegrate effect
-  */
-  private void disintegrate() {
-    // random lines
-    for (int i = 0; i < 30; i++) {
-      stroke(0, 0, 0);
-      line(random(width), random(height), random(width), random(height));
     }
   }
 
