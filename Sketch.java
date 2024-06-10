@@ -1,3 +1,8 @@
+/*
+ * personal formatting:
+ * global variables: has data type as prefix
+ * local variables: does not have data type as prefix
+*/
 import processing.core.PApplet;
 import processing.core.PImage;
 import java.util.ArrayList;
@@ -43,6 +48,9 @@ public class Sketch extends PApplet {
   ArrayList<ObjEnemy> arrListEnemy = new ArrayList<ObjEnemy>();
   // general
   int intLevel;
+  int intLives;
+  int intMana;
+  int intManaConsum;
   float fltSize;
   float fltGuiX;
   float fltGuiY;
@@ -54,13 +62,13 @@ public class Sketch extends PApplet {
   boolean boolA;
   boolean boolS;
   boolean boolD;
-
+  
   /**
    * called once
    * settings function
    */
   public void settings() {
-    size(1000, 600);
+    size(600, 600);
   }
 
   /**
@@ -70,6 +78,7 @@ public class Sketch extends PApplet {
   public void setup() {
     // initialize variables
     intLevel = 1;
+    intLives = 10;
     fltSize = width * height;
     fltGuiX = 0 + fltSize / 5000;
     fltGuiY = 0 + fltSize / 5000;
@@ -85,11 +94,19 @@ public class Sketch extends PApplet {
    * draw function
    */
   public void draw() {
-    clear();
-    noStroke();
-    enemyMain();
-    levelsMain();
-    inputsMain();
+    // game running
+    if (intLives > 0) {
+      disintegrate();
+      noStroke();
+      enemyMain();
+      statsMain();
+      inputsMain();
+    }
+    // game end
+    else {
+      String endScreen = "Game Over";
+      text(endScreen, (width / 2) - (textWidth(endScreen) / 2), height / 2);
+    }
   }
 
   /**
@@ -102,8 +119,12 @@ public class Sketch extends PApplet {
       // vfx
       fill(255, 255, 255);
       ellipse(indivEnemy.fltPosX, indivEnemy.fltPosY, indivEnemy.fltDia, indivEnemy.fltDia);
-      // death conditions
-      if (indivEnemy.intHealth <= 0 || dist(mouseX, mouseY, indivEnemy.fltPosX, indivEnemy.fltPosY) < indivEnemy.fltDia) {explosion(indivEnemy);}
+      // collision
+      if (indivEnemy.intHealth <= 0) {explosion(indivEnemy);}
+      if (dist(mouseX, mouseY, indivEnemy.fltPosX, indivEnemy.fltPosY) < indivEnemy.fltDia) {
+        explosion(indivEnemy);
+        intLives -= 1;
+      }
       // movement: get distance
       indivEnemy.dblDistX = mouseX - indivEnemy.fltPosX;
       indivEnemy.dblDistY = mouseY - indivEnemy.fltPosY;
@@ -119,7 +140,21 @@ public class Sketch extends PApplet {
 
   /**
    * called on command
+   * damage indicator
+   * @param dmgEnemy    damaged enemy
+  */
+  private void damageIndic(ObjEnemy dmgEnemy) {
+    // local variables
+    String health = Integer.toString(dmgEnemy.intHealth);
+    // display health
+    fill(255, 0, 0);
+    text(health, dmgEnemy.fltPosX - (textWidth(health) / 2), dmgEnemy.fltPosY - dmgEnemy.fltDia);
+  }
+
+  /**
+   * called on command
    * explosion
+   * @param explEnemy   exploded enemy
   */
   private void explosion(ObjEnemy explEnemy) {
     // vfx
@@ -130,6 +165,7 @@ public class Sketch extends PApplet {
       ObjEnemy indivEnemy = arrListEnemy.get(i);
       if (dist(indivEnemy.fltPosX, indivEnemy.fltPosY, explEnemy.fltPosX, explEnemy.fltPosY) < indivEnemy.fltDia + explEnemy.fltDia * 3) {
         indivEnemy.intHealth -= 20;
+        damageIndic(indivEnemy);
       }
     }
     // remove from list
@@ -138,11 +174,15 @@ public class Sketch extends PApplet {
 
   /**
    * called in draw
-   * levels main code
+   * stats main code
   */
-  private void levelsMain(){
-    // display level count
-    text("Level " + intLevel, fltGuiX, fltGuiY * 1.5f);
+  private void statsMain(){
+    // displays
+    text("Level: " + intLevel, fltGuiX, fltGuiY * 1.5f);
+    text("Lives: " + intLives, fltGuiX, fltGuiY * 2.0f);
+    text("Mana: " + intMana, fltGuiX, fltGuiY * 2.5f);
+    // mana regeneration
+    if (intMana < 200) {intMana += 1;}
     // when 0 enemies
     if (arrListEnemy.size() <= 0) {
       // creates new level
@@ -172,20 +212,26 @@ public class Sketch extends PApplet {
     }
     // when record reaches limit
     if (strInputs.length() >= 3) {
-      // input combo (sss): freeze
-      if (strInputs.equals("sss")) {
-        // runtime
-        if (intDelayTimer < 0) {intDelayTimer = 100;}
+      // input combo (sdd): freeze
+      if (strInputs.equals("sdd") && intMana >= 200) {
+        // runs once
+        if (intDelayTimer < 0) {
+          intManaConsum = 200;
+          intDelayTimer = 100;
+        }
         // freezes targets
         for (int i = 0; i < arrListEnemy.size(); i++) {
           ObjEnemy indivEnemy = arrListEnemy.get(i);
           freeze(indivEnemy);
         }
       }
-      // input combo (wss): lightning
-      else if (strInputs.equals("wss")) {
-        // runtime
-        if (intDelayTimer < 0) {intDelayTimer = 40;}
+      // input combo (sss): lightning
+      else if (strInputs.equals("sss") && intMana >= 100) {
+        // runs once
+        if (intDelayTimer < 0) {
+          intManaConsum = 100;
+          intDelayTimer = 40;
+        }
         // strikes 3 times
         if (intDelayTimer % 20 == 0) {
           // local variables
@@ -203,10 +249,17 @@ public class Sketch extends PApplet {
           ObjEnemy indivEnemy = arrListEnemy.get(targetIndex);
           lightning(indivEnemy.fltPosX, indivEnemy.fltPosY);
           indivEnemy.intHealth -= 200;
+          damageIndic(indivEnemy);
         }
+      }
+      // invalid input combo
+      else {
+        text("INVALID", fltGuiX, fltGuiY);
+        intManaConsum = 0;
       }
       // resets record
       if (intDelayTimer <= 0) {
+        intMana -= intManaConsum;
         strInputs = "";
       }
     }
@@ -231,6 +284,7 @@ public class Sketch extends PApplet {
     target.fltSpeed /= 1.05;
     // restores speed after duration
     if (intDelayTimer <= 0) {
+      target.fltOrigSpeed /= 2;
       target.fltSpeed = target.fltOrigSpeed;
     }
   }
@@ -273,6 +327,17 @@ public class Sketch extends PApplet {
           bposY = bposY2;
         }
       }
+    }
+  }
+
+  /**
+   * called in draw
+   * disintegration effect
+  */
+  private void disintegrate() {
+    stroke(0, 0, 0);
+    for (int i = 0; i <= 50; i++) {
+      line(random(width), random(height), random(width), random(height));
     }
   }
 
