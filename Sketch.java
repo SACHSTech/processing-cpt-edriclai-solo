@@ -29,6 +29,8 @@ public class Sketch extends PApplet {
     float fltSpeed;
     float fltOrigSpeed;
     int intHealth;
+    int intCellPosX;
+    int intCellPosY;
     // constructor
     public ObjEnemy() {
       this.fltPosX = random(width);
@@ -45,8 +47,10 @@ public class Sketch extends PApplet {
    * and data structures
   */
   // data structures
-  ArrayList<ObjEnemy> arrListEnemy = new ArrayList<ObjEnemy>();
+  int arrGrid[][];
+  ArrayList<ObjEnemy> arrListEnemy;
   // general
+  int intCellSize;
   int intLevel;
   int intLives;
   int intMana;
@@ -62,7 +66,7 @@ public class Sketch extends PApplet {
   boolean boolA;
   boolean boolS;
   boolean boolD;
-  
+
   /**
    * called once
    * settings function
@@ -76,6 +80,10 @@ public class Sketch extends PApplet {
    * setup functions
    */
   public void setup() {
+    // initialize data structures
+    intCellSize = 40;
+    arrGrid = new int[width / intCellSize][height / intCellSize];
+    arrListEnemy = new ArrayList<ObjEnemy>();
     // initialize variables
     intLevel = 1;
     intLives = 10;
@@ -99,12 +107,14 @@ public class Sketch extends PApplet {
       disintegrate();
       noStroke();
       enemyMain();
+      obstacleMain();
       statsMain();
       inputsMain();
     }
     // game end
     else {
       String endScreen = "Game Over";
+      clear();
       text(endScreen, (width / 2) - (textWidth(endScreen) / 2), height / 2);
     }
   }
@@ -125,6 +135,10 @@ public class Sketch extends PApplet {
         explosion(indivEnemy);
         intLives -= 1;
       }
+      // obstacle interactions
+      indivEnemy.intCellPosX = (int) (indivEnemy.fltPosX / intCellSize);
+      indivEnemy.intCellPosY = (int) (indivEnemy.fltPosY / intCellSize);
+      if (arrGrid[indivEnemy.intCellPosX][indivEnemy.intCellPosY] == 1) {explosion(indivEnemy);}
       // movement: get distance
       indivEnemy.dblDistX = mouseX - indivEnemy.fltPosX;
       indivEnemy.dblDistY = mouseY - indivEnemy.fltPosY;
@@ -174,10 +188,28 @@ public class Sketch extends PApplet {
 
   /**
    * called in draw
+   * obstacle main code
+  */
+  private void obstacleMain() {
+    // loops through all cells
+    for (int row = 0; row < arrGrid.length; row++) {
+      for (int column = 0; column < arrGrid[0].length; column++) {
+        // cell statuses
+        if (arrGrid[row][column] == 1) {
+          fill(255, 255, 0);
+          rect(row * intCellSize, column * intCellSize, intCellSize / 2, intCellSize / 2);
+        }
+      }
+    }
+  }
+
+  /**
+   * called in draw
    * stats main code
   */
   private void statsMain(){
     // displays
+    fill(255, 255, 255);
     text("Level: " + intLevel, fltGuiX, fltGuiY * 1.5f);
     text("Lives: " + intLives, fltGuiX, fltGuiY * 2.0f);
     text("Mana: " + intMana, fltGuiX, fltGuiY * 2.5f);
@@ -185,14 +217,23 @@ public class Sketch extends PApplet {
     if (intMana < 200) {intMana += 1;}
     // when 0 enemies
     if (arrListEnemy.size() <= 0) {
-      // creates new level
+      // new enemies
       intLevel += 1;
       for (int i = 0; i < (random(10) * intLevel); i++) {
         arrListEnemy.add(new ObjEnemy());
       }
+      // new obstacles
+      for (int row = 0; row < arrGrid.length; row++) {
+        for (int column = 0; column < arrGrid[0].length; column++) {
+          arrGrid[row][column] = 0;
+        }
+      }
+      for (int i = 0; i < random(10); i++) {
+        arrGrid[(int)random(arrGrid.length)][(int)random(arrGrid[0].length)] = 1;
+      }
     }
   }
-
+  
   /**
    * called in draw
    * inputs
@@ -351,7 +392,7 @@ public class Sketch extends PApplet {
     else if (key == 's') {boolS = true;}
     else if (key == 'd') {boolD = true;}
   }
-
+  
   /**
    * called on key released
    * keyReleased function
