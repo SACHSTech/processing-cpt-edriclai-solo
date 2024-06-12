@@ -48,6 +48,8 @@ public class Sketch extends PApplet {
   */
   // data structures
   int arrGrid[][];
+  float arrArrowsPosX[];
+  float arrArrowsPosY[];
   ArrayList<ObjEnemy> arrListEnemy;
   // general
   int intCellSize;
@@ -66,6 +68,8 @@ public class Sketch extends PApplet {
   boolean boolA;
   boolean boolS;
   boolean boolD;
+  // specific
+  int intNumArrows;
 
   /**
    * called once
@@ -74,7 +78,7 @@ public class Sketch extends PApplet {
   public void settings() {
     size(600, 600);
   }
-
+  
   /**
    * called once
    * setup functions
@@ -82,7 +86,10 @@ public class Sketch extends PApplet {
   public void setup() {
     // initialize data structures
     intCellSize = 40;
+    intNumArrows = 50;
     arrGrid = new int[width / intCellSize][height / intCellSize];
+    arrArrowsPosX = new float[intNumArrows];
+    arrArrowsPosY = new float[intNumArrows];
     arrListEnemy = new ArrayList<ObjEnemy>();
     // initialize variables
     intLevel = 1;
@@ -139,6 +146,7 @@ public class Sketch extends PApplet {
       indivEnemy.intCellPosX = (int) (indivEnemy.fltPosX / intCellSize);
       indivEnemy.intCellPosY = (int) (indivEnemy.fltPosY / intCellSize);
       if (arrGrid[indivEnemy.intCellPosX][indivEnemy.intCellPosY] == 1) {explosion(indivEnemy);}
+      if (arrGrid[indivEnemy.intCellPosX][indivEnemy.intCellPosY] == 2) {indivEnemy.fltSpeed *= 1.1;}
       // movement: get distance
       indivEnemy.dblDistX = mouseX - indivEnemy.fltPosX;
       indivEnemy.dblDistY = mouseY - indivEnemy.fltPosY;
@@ -194,9 +202,14 @@ public class Sketch extends PApplet {
     // loops through all cells
     for (int row = 0; row < arrGrid.length; row++) {
       for (int column = 0; column < arrGrid[0].length; column++) {
-        // cell statuses
+        // cell status: 1 = wall
         if (arrGrid[row][column] == 1) {
           fill(255, 255, 0);
+          rect(row * intCellSize, column * intCellSize, intCellSize / 2, intCellSize / 2);
+        }
+        // cell status: 2 = speed
+        if (arrGrid[row][column] == 2) {
+          fill(0, 255, 255);
           rect(row * intCellSize, column * intCellSize, intCellSize / 2, intCellSize / 2);
         }
       }
@@ -230,6 +243,7 @@ public class Sketch extends PApplet {
       }
       for (int i = 0; i < random(10); i++) {
         arrGrid[(int)random(arrGrid.length)][(int)random(arrGrid[0].length)] = 1;
+        arrGrid[(int)random(arrGrid.length)][(int)random(arrGrid[0].length)] = 2;
       }
     }
   }
@@ -253,11 +267,11 @@ public class Sketch extends PApplet {
     }
     // when record reaches limit
     if (strInputs.length() >= 3) {
-      // input combo (sdd): freeze
-      if (strInputs.equals("sdd") && intMana >= 200) {
+      // input combo (add): freeze
+      if (strInputs.equals("add") && intMana >= 150) {
         // runs once
         if (intDelayTimer < 0) {
-          intManaConsum = 200;
+          intManaConsum = 150;
           intDelayTimer = 100;
         }
         // freezes targets
@@ -289,9 +303,24 @@ public class Sketch extends PApplet {
           // strikes target
           ObjEnemy indivEnemy = arrListEnemy.get(targetIndex);
           lightning(indivEnemy.fltPosX, indivEnemy.fltPosY);
-          indivEnemy.intHealth -= 200;
+          indivEnemy.intHealth -= 1000;
           damageIndic(indivEnemy);
         }
+      }
+      // input combo (wws): arrows
+      else if (strInputs.equals("wws") && intMana >= 100) {
+        // runs once
+        if (intDelayTimer < 0) {
+          intManaConsum = 100;
+          intDelayTimer = 100;
+          // resets arrow positions
+          for (int i = 0; i < intNumArrows; i++) {
+            arrArrowsPosX[i] = random(width);
+            arrArrowsPosY[i] = -random(height);
+          }
+        }
+        // arrows
+        arrows();
       }
       // invalid input combo
       else {
@@ -303,6 +332,39 @@ public class Sketch extends PApplet {
         intMana -= intManaConsum;
         strInputs = "";
       }
+    }
+  }
+
+  /**
+   * called on command
+   * arrows
+  */
+  private void arrows() {
+    // local variables
+    int i = 0;
+    float arrowSize = fltSize / 100000;
+    float arrowSpeed = fltSize / 20000;
+    // using while loops
+    while(i < intNumArrows) {
+      // vfx
+      fill(255, 0, 0);
+      rect(arrArrowsPosX[i], arrArrowsPosY[i], arrowSize, arrowSize);
+      // movement
+      arrArrowsPosY[i] += arrowSpeed;
+      if (arrArrowsPosY[i] >= width) {
+        arrArrowsPosX[i] = random(width);
+        arrArrowsPosY[i] = -random(height);
+      }
+      // collision
+      for (int i2 = 0; i2 < arrListEnemy.size(); i2++) {
+        ObjEnemy indivEnemy = arrListEnemy.get(i2);
+        if (dist(arrArrowsPosX[i], arrArrowsPosY[i], indivEnemy.fltPosX, indivEnemy.fltPosY) < indivEnemy.fltDia + arrowSize) {
+          indivEnemy.intHealth -= 10;
+          damageIndic(indivEnemy);
+        }
+      }
+      // iterations
+      i += 1;
     }
   }
 
