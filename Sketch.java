@@ -69,6 +69,7 @@ public class Sketch extends PApplet {
   boolean boolS;
   boolean boolD;
   // specific
+  boolean boolGameStart;
   int intNumArrows;
 
   /**
@@ -98,32 +99,61 @@ public class Sketch extends PApplet {
     fltGuiX = 0 + fltSize / 5000;
     fltGuiY = 0 + fltSize / 5000;
     strInputs = "";
+    boolGameStart = false;
     // general
     background(0, 0, 0);
     strokeWeight(fltSize / 200000);
     textSize(fltSize / 20000);
   }
-
+  
   /**
    * called repeatedly
    * draw function
    */
   public void draw() {
     // game running
-    if (intLives > 0) {
-      disintegrate();
-      noStroke();
-      enemyMain();
-      obstacleMain();
-      statsMain();
-      inputsMain();
+    if (boolGameStart) {
+      if (intLives > 0) {
+        disintegrate();
+        noStroke();
+        enemyMain();
+        obstacleMain();
+        statsMain();
+        inputsMain();
+      }
+      // game end
+      else {
+        String endScreen = "Game Over";
+        clear();
+        centerText(endScreen, height / 2);
+      }
     }
-    // game end
+    // starting screen
     else {
-      String endScreen = "Game Over";
+      // local variables
+      String startScreen = "Press any key to start";
+      String tip1 = "inputs: add, sss, wws";
+      String tip2 = "mana: all abilities cost mana!";
+      String tip3 = "hold down the mouse to regenerate it.";
+      // display
       clear();
-      text(endScreen, (width / 2) - (textWidth(endScreen) / 2), height / 2);
+      centerText(startScreen, height / 2.0f);
+      text(tip1, fltGuiX, height / 1.6f);
+      text(tip2, fltGuiX, height / 1.5f);
+      text(tip3, fltGuiX, height / 1.4f);
+      // start conditions
+      if (keyPressed) {boolGameStart = true;}
     }
+  }
+
+  /**
+   * called in command
+   * center text
+   * @param text  text that needs to be centered
+   * @param posY  y position of text on screen
+  */
+  private void centerText(String text, float posY) {
+    text(text, (width / 2) - (textWidth(text) / 2), posY);
   }
 
   /**
@@ -227,7 +257,7 @@ public class Sketch extends PApplet {
     text("Lives: " + intLives, fltGuiX, fltGuiY * 2.0f);
     text("Mana: " + intMana, fltGuiX, fltGuiY * 2.5f);
     // mana regeneration
-    if (intMana < 200) {intMana += 1;}
+    if (intMana < 200 && mousePressed) {intMana += 1;}
     // when 0 enemies
     if (arrListEnemy.size() <= 0) {
       // new enemies
