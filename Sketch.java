@@ -48,6 +48,7 @@ public class Sketch extends PApplet {
   */
   // data structures
   int arrGrid[][];
+  int arrGamble[];
   float arrArrowsPosX[];
   float arrArrowsPosY[];
   ArrayList<ObjEnemy> arrListEnemy;
@@ -89,6 +90,7 @@ public class Sketch extends PApplet {
     intCellSize = 40;
     intNumArrows = 50;
     arrGrid = new int[width / intCellSize][height / intCellSize];
+    arrGamble = new int[3];
     arrArrowsPosX = new float[intNumArrows];
     arrArrowsPosY = new float[intNumArrows];
     arrListEnemy = new ArrayList<ObjEnemy>();
@@ -133,7 +135,7 @@ public class Sketch extends PApplet {
     else {
       // local variables
       String startScreen = "Press any key to start";
-      String tip1 = "inputs: add, sss, wws";
+      String tip1 = "inputs: add, ddd, sss, wws";
       String tip2 = "mana: all abilities cost mana!";
       String tip3 = "hold down the mouse to regenerate it.";
       // display
@@ -299,8 +301,24 @@ public class Sketch extends PApplet {
     }
     // when record reaches limit
     if (strInputs.length() >= 3) {
-      // input combo (add): freeze
-      if (strInputs.equals("add") && intMana >= 150) {
+      // input combo (add): gamble
+      if (strInputs.equals("add") && intMana >= 100) {
+        // runs once
+        if (intDelayTimer < 0) {
+          intManaConsum = 100;
+          intDelayTimer = 60;
+          // resets slots
+          for (int i = 0; i < arrGamble.length; i++) {
+            arrGamble[i] = 0;
+          }
+        }
+        // rolls slot machine
+        if (intDelayTimer % 20 == 0) {
+          gamble();
+        }
+      }
+      // input combo (ddd): freeze
+      else if (strInputs.equals("ddd") && intMana >= 150) {
         // runs once
         if (intDelayTimer < 0) {
           intManaConsum = 150;
@@ -391,13 +409,53 @@ public class Sketch extends PApplet {
       for (int i2 = 0; i2 < arrListEnemy.size(); i2++) {
         ObjEnemy indivEnemy = arrListEnemy.get(i2);
         if (dist(arrArrowsPosX[i], arrArrowsPosY[i], indivEnemy.fltPosX, indivEnemy.fltPosY) < indivEnemy.fltDia + arrowSize) {
-          indivEnemy.intHealth -= 10;
+          indivEnemy.intHealth -= 50;
           damageIndic(indivEnemy);
         }
       }
       // iterations
       i += 1;
     }
+  }
+  
+  /**
+   * called on command
+   * gamble
+  */
+  private void gamble() {
+    // local variables
+    int index = 0;
+    String result = "X   X   X";
+    // when all slots filled
+    if (arrGamble[2] != 0) {
+      // 3 of a kind
+      if (arrGamble[0] == arrGamble[1] && arrGamble[1] == arrGamble[2]) {
+        // damages all enemies
+        for (int i = 0; i < arrListEnemy.size(); i++) {
+          ObjEnemy indivEnemy = arrListEnemy.get(i);
+          indivEnemy.intHealth -= 5000;
+        }
+        // win vfx
+        fill(255, 255, 0);
+        result = "$   $   $";
+      }
+    }
+    // using for each loops
+    for(int currSlot : arrGamble) {
+      // updates slot value
+      if (currSlot == 0) {
+        arrGamble[index] = (int) random(6, 8);
+        String slot1 = Integer.toString(arrGamble[0]);
+        String slot2 = Integer.toString(arrGamble[1]);
+        String slot3 = Integer.toString(arrGamble[2]);
+        result = slot1 + "   " + slot2 + "   " + slot3;
+        break;
+      }
+      // index
+      index += 1;
+    }
+    // display slots
+    centerText(result, width / 2, height / 2);
   }
 
   /**
