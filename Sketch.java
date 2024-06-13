@@ -1,7 +1,7 @@
 /*
- * personal formatting:
- * global variables: has data type as prefix
- * local variables: does not have data type as prefix
+personal formatting:
+global variables: has data type as prefix
+local variables: does not have data type as prefix
 */
 import processing.core.PApplet;
 import processing.core.PImage;
@@ -28,9 +28,9 @@ public class Sketch extends PApplet {
     float fltDia;
     float fltSpeed;
     float fltOrigSpeed;
-    int intHealth;
     int intCellPosX;
     int intCellPosY;
+    int intHealth;
     // constructor
     public ObjEnemy() {
       this.fltPosX = random(width);
@@ -64,12 +64,12 @@ public class Sketch extends PApplet {
   int intDelayTimer;
   int intInputTimer;
   String strInputs;
-  boolean boolW;
-  boolean boolA;
-  boolean boolS;
-  boolean boolD;
+  boolean boolIsW;
+  boolean boolIsA;
+  boolean boolIsS;
+  boolean boolIsD;
   // specific
-  boolean boolGameStart;
+  boolean boolIsGameStart;
   int intNumArrows;
 
   /**
@@ -79,7 +79,7 @@ public class Sketch extends PApplet {
   public void settings() {
     size(600, 600);
   }
-  
+
   /**
    * called once
    * setup functions
@@ -99,7 +99,7 @@ public class Sketch extends PApplet {
     fltGuiX = 0 + fltSize / 5000;
     fltGuiY = 0 + fltSize / 5000;
     strInputs = "";
-    boolGameStart = false;
+    boolIsGameStart = false;
     // general
     background(0, 0, 0);
     strokeWeight(fltSize / 200000);
@@ -111,8 +111,9 @@ public class Sketch extends PApplet {
    * draw function
    */
   public void draw() {
-    // game running
-    if (boolGameStart) {
+    // game started
+    if (boolIsGameStart) {
+      // game running
       if (intLives > 0) {
         disintegrate();
         noStroke();
@@ -125,10 +126,10 @@ public class Sketch extends PApplet {
       else {
         String endScreen = "Game Over";
         clear();
-        centerText(endScreen, height / 2);
+        centerText(endScreen, width / 2, height / 2);
       }
     }
-    // starting screen
+    // awaiting start
     else {
       // local variables
       String startScreen = "Press any key to start";
@@ -137,23 +138,24 @@ public class Sketch extends PApplet {
       String tip3 = "hold down the mouse to regenerate it.";
       // display
       clear();
-      centerText(startScreen, height / 2.0f);
+      centerText(startScreen, width / 2, height / 2);
       text(tip1, fltGuiX, height / 1.6f);
       text(tip2, fltGuiX, height / 1.5f);
       text(tip3, fltGuiX, height / 1.4f);
       // start conditions
-      if (keyPressed) {boolGameStart = true;}
+      if (keyPressed) {boolIsGameStart = true;}
     }
   }
 
   /**
-   * called in command
-   * center text
+   * called on command
+   * centers text
    * @param text  text that needs to be centered
+   * @param posX  x position of text on screen
    * @param posY  y position of text on screen
   */
-  private void centerText(String text, float posY) {
-    text(text, (width / 2) - (textWidth(text) / 2), posY);
+  private void centerText(String text, float posX, float posY) {
+    text(text, posX - (textWidth(text) / 2), posY);
   }
 
   /**
@@ -200,7 +202,7 @@ public class Sketch extends PApplet {
     String health = Integer.toString(dmgEnemy.intHealth);
     // display health
     fill(255, 0, 0);
-    text(health, dmgEnemy.fltPosX - (textWidth(health) / 2), dmgEnemy.fltPosY - dmgEnemy.fltDia);
+    centerText(health, dmgEnemy.fltPosX, dmgEnemy.fltPosY - dmgEnemy.fltDia);
   }
 
   /**
@@ -257,12 +259,12 @@ public class Sketch extends PApplet {
     text("Lives: " + intLives, fltGuiX, fltGuiY * 2.0f);
     text("Mana: " + intMana, fltGuiX, fltGuiY * 2.5f);
     // mana regeneration
-    if (intMana < 200 && mousePressed) {intMana += 1;}
+    if (intMana < 200) {intMana += 1;}
     // when 0 enemies
     if (arrListEnemy.size() <= 0) {
       // new enemies
       intLevel += 1;
-      for (int i = 0; i < (random(10) * intLevel); i++) {
+      for (int i = 0; i < (random(20)); i++) {
         arrListEnemy.add(new ObjEnemy());
       }
       // new obstacles
@@ -277,10 +279,10 @@ public class Sketch extends PApplet {
       }
     }
   }
-  
+
   /**
    * called in draw
-   * inputs
+   * inputs main code
   */
   private void inputsMain() {
     // general
@@ -289,10 +291,10 @@ public class Sketch extends PApplet {
     text(strInputs, fltGuiX, fltGuiY);
     // records inputs
     if (strInputs.length() < 3 && keyPressed && intInputTimer <= 0) {
-      if (boolW) {strInputs += 'w';}
-      if (boolA) {strInputs += 'a';}
-      if (boolS) {strInputs += 's';}
-      if (boolD) {strInputs += 'd';}
+      if (boolIsW) {strInputs += 'w';}
+      if (boolIsA) {strInputs += 'a';}
+      if (boolIsS) {strInputs += 's';}
+      if (boolIsD) {strInputs += 'd';}
       intInputTimer = 10;
     }
     // when record reaches limit
@@ -425,8 +427,8 @@ public class Sketch extends PApplet {
   /**
    * called on command
    * lightning
-   * @param strikePosX  X coord where lightning lands
-   * @param strikePosY  Y coord where lightning lands
+   * @param strikePosX  x coord where lightning lands
+   * @param strikePosY  y coord where lightning lands
   */
   private void lightning(float strikePosX, float strikePosY) {
     // local variables
@@ -479,10 +481,10 @@ public class Sketch extends PApplet {
    * keyPressed function
   */
   public void keyPressed() {
-    if (key == 'w') {boolW = true;}
-    else if (key == 'a') {boolA = true;}
-    else if (key == 's') {boolS = true;}
-    else if (key == 'd') {boolD = true;}
+    if (key == 'w') {boolIsW = true;}
+    else if (key == 'a') {boolIsA = true;}
+    else if (key == 's') {boolIsS = true;}
+    else if (key == 'd') {boolIsD = true;}
   }
   
   /**
@@ -490,9 +492,9 @@ public class Sketch extends PApplet {
    * keyReleased function
   */
   public void keyReleased() {
-    if (key == 'w') {boolW = false;}
-    else if (key == 'a') {boolA = false;}
-    else if (key == 's') {boolS = false;}
-    else if (key == 'd') {boolD = false;}
+    if (key == 'w') {boolIsW = false;}
+    else if (key == 'a') {boolIsA = false;}
+    else if (key == 's') {boolIsS = false;}
+    else if (key == 'd') {boolIsD = false;}
   }
 }
