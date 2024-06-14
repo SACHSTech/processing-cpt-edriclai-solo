@@ -83,7 +83,7 @@ public class Sketch extends PApplet {
   public void settings() {
     size(600, 600);
   }
-
+  
   /**
    * called once
    * setup functions
@@ -106,8 +106,8 @@ public class Sketch extends PApplet {
     strInputs = "";
     boolIsGameStart = false;
     // init images
-    imgAbilitiesArrow = loadImage("vfx/ability/arrow.png");
-    imgAbilitiesFreeze = loadImage("vfx/ability/freeze.png");
+    imgAbilitiesArrow = loadImage("vfx/abilities/arrow.png");
+    imgAbilitiesFreeze = loadImage("vfx/abilities/freeze.png");
     imgAbilitiesArrow.resize((int) fltSize / 50000, 0);
     imgAbilitiesFreeze.resize((int) fltSize / 20000, 0);
     // general
@@ -185,7 +185,7 @@ public class Sketch extends PApplet {
     fill(255, 0, 0);
     centerText(health, dmgEnemy.fltPosX, dmgEnemy.fltPosY - dmgEnemy.fltDia);
   }
-
+  
   /**
    * called on command
    * explosion
@@ -385,8 +385,8 @@ public class Sketch extends PApplet {
       // collision
       for (int i2 = 0; i2 < arrListEnemy.size(); i2++) {
         ObjEnemy indivEnemy = arrListEnemy.get(i2);
-        if (dist(arrArrowsPosX[i], arrArrowsPosY[i], indivEnemy.fltPosX, indivEnemy.fltPosY) < indivEnemy.fltDia) {
-          indivEnemy.intHealth -= 50;
+        if (dist(arrArrowsPosX[i], arrArrowsPosY[i], indivEnemy.fltPosX, indivEnemy.fltPosY) < indivEnemy.fltDia * 2) {
+          indivEnemy.intHealth -= 5;
           damageIndic(indivEnemy);
         }
       }
@@ -450,7 +450,7 @@ public class Sketch extends PApplet {
       target.fltSpeed = target.fltOrigSpeed;
     }
   }
-  
+
   /**
    * called on command
    * lightning
@@ -561,7 +561,7 @@ public class Sketch extends PApplet {
     else if (key == 's') {boolIsS = true;}
     else if (key == 'd') {boolIsD = true;}
   }
-  
+
   /**
    * called on key released
    * keyReleased function
