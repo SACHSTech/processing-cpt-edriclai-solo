@@ -3,7 +3,7 @@
 # 6.1 Processing in Java CPT
 
 ## Objective
-The goal of the game is to reach the highest level possible. There are an unlimited number of levels, each progressively getting more challenging. You start with ten lives, and each collision with an enemy costs you one. Lose all your lives, and the game ends. Use your mouse maneuvering skills to dodge enemies and survive as long as you can.
+The goal of the game is to reach the highest level possible. There are an unlimited number of levels, each progressively getting more challenging. You start with ten lives, and each collision with an enemy costs you one. Lose all your lives, and the game ends. Use your mouse maneuvering skills to dodge enemies and survive as long as you can!
 
 ## Gameplay Mechanics
 ### Enemies
@@ -25,9 +25,9 @@ Typing "sss" summons three lightning strikes periodically. Each lightning strike
 Inputting "wws" summons a rain of arrows that continues for a specified duration. Each arrow inflicts minimal damage upon contact with an enemy.
 
 ## Scoring
-The current level is displayed at the top left of the screen, along with a record of your inputs remaining lives, and mana. You start with a total of 10 lives, and losing all lives results in a game over. Mana is capped at 200, and holding down the mouse button regenerates it. The level advances when all enemies in the current level are defeated.
+The current level is displayed at the top left of the screen, along with a record of your inputs, remaining lives, and mana. You start with a total of 10 lives, and losing all lives results in a game over. Mana is capped at 200, and holding down the mouse button regenerates it. The level advances when all enemies in the current level are defeated.
 
 ## Limitations
 There are a few limitations in this game:
-* The enemy AI is straightforward, and there are no variations in enemy types with different abilities. Additionally, only four specific inputs are currently implemented in the game.
+* The enemy AI is straightforward, and there are no variations in enemy types with different abilities. Additionally, only four input combinations are currently implemented in the game.
 * The mouse can exit the screen, but enemies can still damage you based on the last recorded position of your mouse.
