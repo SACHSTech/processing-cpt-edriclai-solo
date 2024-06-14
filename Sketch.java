@@ -69,9 +69,12 @@ public class Sketch extends PApplet {
   boolean boolIsA;
   boolean boolIsS;
   boolean boolIsD;
-  // specific
-  boolean boolIsGameStart;
+  // misc
   int intNumArrows;
+  boolean boolIsGameStart;
+  // images
+  PImage imgAbilitiesArrow;
+  PImage imgAbilitiesFreeze;
 
   /**
    * called once
@@ -86,7 +89,7 @@ public class Sketch extends PApplet {
    * setup functions
    */
   public void setup() {
-    // initialize data structures
+    // init data structures
     intCellSize = 40;
     intNumArrows = 50;
     arrGrid = new int[width / intCellSize][height / intCellSize];
@@ -94,7 +97,7 @@ public class Sketch extends PApplet {
     arrArrowsPosX = new float[intNumArrows];
     arrArrowsPosY = new float[intNumArrows];
     arrListEnemy = new ArrayList<ObjEnemy>();
-    // initialize variables
+    // init variables
     intLevel = 1;
     intLives = 10;
     fltSize = width * height;
@@ -102,18 +105,23 @@ public class Sketch extends PApplet {
     fltGuiY = 0 + fltSize / 5000;
     strInputs = "";
     boolIsGameStart = false;
+    // init images
+    imgAbilitiesArrow = loadImage("vfx/ability/arrow.png");
+    imgAbilitiesFreeze = loadImage("vfx/ability/freeze.png");
+    imgAbilitiesArrow.resize((int) fltSize / 50000, 0);
+    imgAbilitiesFreeze.resize((int) fltSize / 20000, 0);
     // general
     background(0, 0, 0);
     strokeWeight(fltSize / 200000);
     textSize(fltSize / 20000);
   }
-  
+
   /**
    * called repeatedly
    * draw function
    */
   public void draw() {
-    // game started
+    // game
     if (boolIsGameStart) {
       // game running
       if (intLives > 0) {
@@ -125,39 +133,10 @@ public class Sketch extends PApplet {
         inputsMain();
       }
       // game end
-      else {
-        String endScreen = "Game Over";
-        clear();
-        centerText(endScreen, width / 2, height / 2);
-      }
+      else {overScreen();}
     }
-    // awaiting start
-    else {
-      // local variables
-      String startScreen = "Press any key to start";
-      String tip1 = "inputs: add, ddd, sss, wws";
-      String tip2 = "mana: all abilities cost mana!";
-      String tip3 = "hold down the mouse to regenerate it.";
-      // display
-      clear();
-      centerText(startScreen, width / 2, height / 2);
-      text(tip1, fltGuiX, height / 1.6f);
-      text(tip2, fltGuiX, height / 1.5f);
-      text(tip3, fltGuiX, height / 1.4f);
-      // start conditions
-      if (keyPressed) {boolIsGameStart = true;}
-    }
-  }
-
-  /**
-   * called on command
-   * centers text
-   * @param text  text that needs to be centered
-   * @param posX  x position of text on screen
-   * @param posY  y position of text on screen
-  */
-  private void centerText(String text, float posX, float posY) {
-    text(text, posX - (textWidth(text) / 2), posY);
+    // starting screen
+    else {startScreen();}
   }
 
   /**
@@ -261,12 +240,12 @@ public class Sketch extends PApplet {
     text("Lives: " + intLives, fltGuiX, fltGuiY * 2.0f);
     text("Mana: " + intMana, fltGuiX, fltGuiY * 2.5f);
     // mana regeneration
-    if (intMana < 200) {intMana += 1;}
+    if (intMana < 200 && mousePressed) {intMana += 1;}
     // when 0 enemies
     if (arrListEnemy.size() <= 0) {
       // new enemies
       intLevel += 1;
-      for (int i = 0; i < (random(20)); i++) {
+      for (int i = 0; i < (random(30)); i++) {
         arrListEnemy.add(new ObjEnemy());
       }
       // new obstacles
@@ -392,13 +371,11 @@ public class Sketch extends PApplet {
   private void arrows() {
     // local variables
     int i = 0;
-    float arrowSize = fltSize / 100000;
     float arrowSpeed = fltSize / 20000;
     // using while loops
     while(i < intNumArrows) {
       // vfx
-      fill(255, 0, 0);
-      rect(arrArrowsPosX[i], arrArrowsPosY[i], arrowSize, arrowSize);
+      centerImage(imgAbilitiesArrow, arrArrowsPosX[i], arrArrowsPosY[i]);
       // movement
       arrArrowsPosY[i] += arrowSpeed;
       if (arrArrowsPosY[i] >= width) {
@@ -408,7 +385,7 @@ public class Sketch extends PApplet {
       // collision
       for (int i2 = 0; i2 < arrListEnemy.size(); i2++) {
         ObjEnemy indivEnemy = arrListEnemy.get(i2);
-        if (dist(arrArrowsPosX[i], arrArrowsPosY[i], indivEnemy.fltPosX, indivEnemy.fltPosY) < indivEnemy.fltDia + arrowSize) {
+        if (dist(arrArrowsPosX[i], arrArrowsPosY[i], indivEnemy.fltPosX, indivEnemy.fltPosY) < indivEnemy.fltDia) {
           indivEnemy.intHealth -= 50;
           damageIndic(indivEnemy);
         }
@@ -417,7 +394,7 @@ public class Sketch extends PApplet {
       i += 1;
     }
   }
-  
+
   /**
    * called on command
    * gamble
@@ -425,7 +402,7 @@ public class Sketch extends PApplet {
   private void gamble() {
     // local variables
     int index = 0;
-    String result = "X   X   X";
+    String slots = "X | X | X";
     // when all slots filled
     if (arrGamble[2] != 0) {
       // 3 of a kind
@@ -435,9 +412,9 @@ public class Sketch extends PApplet {
           ObjEnemy indivEnemy = arrListEnemy.get(i);
           indivEnemy.intHealth -= 5000;
         }
-        // win vfx
+        // win fx
         fill(255, 255, 0);
-        result = "$   $   $";
+        slots = "$ | $ | $";
       }
     }
     // using for each loops
@@ -445,17 +422,14 @@ public class Sketch extends PApplet {
       // updates slot value
       if (currSlot == 0) {
         arrGamble[index] = (int) random(6, 8);
-        String slot1 = Integer.toString(arrGamble[0]);
-        String slot2 = Integer.toString(arrGamble[1]);
-        String slot3 = Integer.toString(arrGamble[2]);
-        result = slot1 + "   " + slot2 + "   " + slot3;
+        slots = arrGamble[0] + " | " + arrGamble[1] + " | " + arrGamble[2];
         break;
       }
       // index
       index += 1;
     }
-    // display slots
-    centerText(result, width / 2, height / 2);
+    // roll fx
+    centerText(slots, width / 2, height / 2);
   }
 
   /**
@@ -465,14 +439,9 @@ public class Sketch extends PApplet {
   */
   private void freeze(ObjEnemy target) {
     // vfx
-    for (int i = 0; i < 10; i++) {
-      // local variables
-      float posX = target.fltPosX + random(-target.fltDia / 2, target.fltDia / 2);
-      float posY = target.fltPosY + random(-target.fltDia / 2, target.fltDia / 2);
-      // particles
-      fill(0, 255, 255);
-      ellipse(posX, posY, target.fltDia / 10, target.fltDia / 10);
-    }
+    float posX = target.fltPosX + random(-target.fltDia / 2, target.fltDia / 2);
+    float posY = target.fltPosY + random(-target.fltDia / 2, target.fltDia / 2);
+    centerImage(imgAbilitiesFreeze, posX, posY);
     // slows movement
     target.fltSpeed /= 1.05;
     // restores speed after duration
@@ -481,7 +450,7 @@ public class Sketch extends PApplet {
       target.fltSpeed = target.fltOrigSpeed;
     }
   }
-
+  
   /**
    * called on command
    * lightning
@@ -532,6 +501,54 @@ public class Sketch extends PApplet {
     for (int i = 0; i <= 50; i++) {
       line(random(width), random(height), random(width), random(height));
     }
+  }
+
+  /**
+   * called in draw
+   * starting screen
+  */
+  private void startScreen() {
+    // local variables
+    String startScreen = "Press any key to start";
+    String info = "combos: add, ddd, sss, wws";
+    // display
+    clear();
+    centerText(startScreen, width / 2, height / 2.2f);
+    centerText(info, width / 2, height / 1.8f);
+    // start conditions
+    if (keyPressed) {boolIsGameStart = true;}
+  }
+
+  /**
+   * called in draw
+   * game over screen
+  */
+  private void overScreen() {
+    String endScreen = "Game Over";
+    clear();
+    centerText(endScreen, width / 2, height / 2);
+  }
+
+  /**
+   * called on command
+   * centers text
+   * @param text  text that needs to be centered
+   * @param posX  x position of text on screen
+   * @param posY  y position of text on screen
+  */
+  private void centerText(String text, float posX, float posY) {
+    text(text, posX - (textWidth(text) / 2), posY);
+  }
+
+  /**
+   * called on command
+   * centers image
+   * @param image image that needs to be centered
+   * @param posX  x position of image on screen
+   * @param posY  y position of image on screen
+  */
+  private void centerImage(PImage image, float posX, float posY) {
+    image(image, posX - image.width / 2, posY - image.height / 2);
   }
 
   /**
