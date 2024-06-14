@@ -412,7 +412,7 @@ public class Sketch extends PApplet {
           ObjEnemy indivEnemy = arrListEnemy.get(i);
           indivEnemy.intHealth -= 5000;
         }
-        // win fx
+        // win vfx
         fill(255, 255, 0);
         slots = "$ | $ | $";
       }
@@ -428,7 +428,7 @@ public class Sketch extends PApplet {
       // index
       index += 1;
     }
-    // roll fx
+    // roll vfx
     centerText(slots, width / 2, height / 2);
   }
 
