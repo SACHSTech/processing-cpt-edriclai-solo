@@ -138,6 +138,7 @@ public class Sketch extends PApplet {
       if (intLives > 0) {
         disintegrate();
         noStroke();
+        playerMain();
         enemyMain();
         obstacleMain();
         statsMain();
@@ -518,6 +519,15 @@ public class Sketch extends PApplet {
         }
       }
     }
+  }
+  
+  /**
+   * called in draw
+   * player main code
+  */
+  private void playerMain() {
+    fill(0, 255, 255);
+    ellipse(mouseX, mouseY, fltSize / 100000, fltSize / 100000);
   }
   
   /**
