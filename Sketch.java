@@ -6,6 +6,7 @@ local variables: does not have data type as prefix
 import processing.core.PApplet;
 import processing.core.PImage;
 import java.util.ArrayList;
+import java.util.Scanner;
 // sound
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -83,13 +84,15 @@ public class Sketch extends PApplet {
   // images
   PImage imgAbilitiesArrow;
   PImage imgAbilitiesFreeze;
-
+  
   /**
    * called once
    * settings function
    */
   public void settings() {
-    size(600, 600);
+    int screenWidth = readInt("Enter screen width (default: 600): ");
+    int screenHeight = readInt("Enter screen height (default: 600): ");
+    size(screenWidth, screenHeight);
   }
   
   /**
@@ -224,12 +227,12 @@ public class Sketch extends PApplet {
     // loops through all cells
     for (int row = 0; row < arrGrid.length; row++) {
       for (int column = 0; column < arrGrid[0].length; column++) {
-        // cell status: 1 = wall
+        // 1 = wall cell
         if (arrGrid[row][column] == 1) {
           fill(255, 255, 0);
           rect(row * intCellSize, column * intCellSize, intCellSize / 2, intCellSize / 2);
         }
-        // cell status: 2 = speed
+        // 2 = speed cell
         if (arrGrid[row][column] == 2) {
           fill(0, 255, 255);
           rect(row * intCellSize, column * intCellSize, intCellSize / 2, intCellSize / 2);
@@ -257,15 +260,16 @@ public class Sketch extends PApplet {
       for (int i = 0; i < (random(30)); i++) {
         arrListEnemy.add(new ObjEnemy());
       }
-      // new obstacles
+      // reset obstacles
       for (int row = 0; row < arrGrid.length; row++) {
         for (int column = 0; column < arrGrid[0].length; column++) {
           arrGrid[row][column] = 0;
         }
       }
+      // new obstacles
       for (int i = 0; i < random(10); i++) {
-        arrGrid[(int)random(arrGrid.length)][(int)random(arrGrid[0].length)] = 1;
-        arrGrid[(int)random(arrGrid.length)][(int)random(arrGrid[0].length)] = 2;
+        arrGrid[(int) random(arrGrid.length)][(int) random(arrGrid[0].length)] = 1;
+        arrGrid[(int) random(arrGrid.length)][(int) random(arrGrid[0].length)] = 2;
       }
     }
   }
@@ -390,7 +394,7 @@ public class Sketch extends PApplet {
       centerImage(imgAbilitiesArrow, arrArrowsPosX[i], arrArrowsPosY[i]);
       // movement
       arrArrowsPosY[i] += arrowSpeed;
-      if (arrArrowsPosY[i] >= width) {
+      if (arrArrowsPosY[i] >= height) {
         arrArrowsPosX[i] = random(width);
         arrArrowsPosY[i] = -random(height);
       }
@@ -434,7 +438,7 @@ public class Sketch extends PApplet {
         // minimal damage to all enemies
         for (int i = 0; i < arrListEnemy.size(); i++) {
           ObjEnemy indivEnemy = arrListEnemy.get(i);
-          indivEnemy.intHealth -= 100;
+          indivEnemy.intHealth -= 200;
           damageIndic(indivEnemy);
         }
       }
@@ -515,7 +519,7 @@ public class Sketch extends PApplet {
       }
     }
   }
-
+  
   /**
    * called in draw
    * disintegration effect
@@ -534,11 +538,11 @@ public class Sketch extends PApplet {
   private void startScreen() {
     // local variables
     String startScreen = "Press any key to start";
-    String info = "combos: add, ddd, sss, wws";
+    String tip = "combos: add, ddd, sss, wws";
     // display
     clear();
     centerText(startScreen, width / 2, height / 2.2f);
-    centerText(info, width / 2, height / 1.8f);
+    centerText(tip, width / 2, height / 1.8f);
     // start conditions
     if (keyPressed) {boolIsGameStart = true;}
   }
@@ -598,6 +602,24 @@ public class Sketch extends PApplet {
     catch (LineUnavailableException e) {e.printStackTrace();}
   }
 
+  /**
+   * called on command
+   * readInt method
+   * @param prompt  input prompt statement
+   * @return        returns user integer input
+  */
+  public static int readInt(String prompt) {
+    Scanner scanner = new Scanner(System.in);
+    System.out.print(prompt);
+    // invalid input
+    while (!scanner.hasNextInt()) {
+      System.out.print("Invalid input: ");
+      scanner.next();
+    }
+    // return integer input
+    return scanner.nextInt();
+  }
+  
   /**
    * called on key pressed
    * keyPressed function
