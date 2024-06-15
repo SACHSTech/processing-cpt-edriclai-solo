@@ -24,6 +24,17 @@ Typing "sss" summons three lightning strikes periodically. Each lightning strike
 4. Input "wws" (costs 100 mana):
 Inputting "wws" summons a rain of arrows that continues for a specified duration. Each arrow inflicts minimal damage upon contact with an enemy.
 
+### Obstacles
+New obstacles will appear at every level, offering distinct advantages or disadvantages to the player and enemies. Your task is to navigate the enemy towards the appropriate obstacles.
+
+Yellow: Wall Cell
+
+The yellow obstacle represents a wall. While the player can move through walls unhindered, enemies cannot. If an enemy contacts a wall, it will immediately explode.
+
+Blue: Speed Cell
+
+The blue obstacles provide speed boosts. Players do not gain any speed enhancement from these cells, but enemies do. Upon contact with a blue cell, an enemy receives a permanent speed boost.
+
 ## Scoring
 The current level is displayed at the top left of the screen, along with a record of your inputs, remaining lives, and mana. You start with a total of 10 lives, and losing all lives results in a game over. Mana is capped at 200, and holding down the mouse button regenerates it. The level advances when all enemies in the current level are defeated.
 
@@ -31,3 +42,11 @@ The current level is displayed at the top left of the screen, along with a recor
 There are a few limitations in this game:
 * The enemy AI is straightforward, and there are no variations in enemy types with different abilities. Additionally, only four input combinations are currently implemented in the game.
 * The mouse can exit the screen, but enemies can still damage you based on the last recorded position of your mouse.
+
+## Images
+### Enemies
+![fig1](figures/figure1.png)
+### Obstacles
+![fig2](figures/figure2.png)
+### Scoring
+![fig3](figures/figure3.png)

@@ -6,6 +6,14 @@ local variables: does not have data type as prefix
 import processing.core.PApplet;
 import processing.core.PImage;
 import java.util.ArrayList;
+// sound
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
+import java.io.File;
+import java.io.IOException;
 
 /**
  * Processing CPT
@@ -192,9 +200,10 @@ public class Sketch extends PApplet {
    * @param explEnemy   exploded enemy
   */
   private void explosion(ObjEnemy explEnemy) {
-    // vfx
+    // fx
     fill(255, 0, 0);
     ellipse(explEnemy.fltPosX, explEnemy.fltPosY, explEnemy.fltDia * 3, explEnemy.fltDia * 3);
+    playSound("sfx/enemies/explode.wav");
     // collateral damage
     for (int i = 0; i < arrListEnemy.size(); i++) {
       ObjEnemy indivEnemy = arrListEnemy.get(i);
@@ -285,14 +294,15 @@ public class Sketch extends PApplet {
         // runs once
         if (intDelayTimer < 0) {
           intManaConsum = 100;
-          intDelayTimer = 60;
+          intDelayTimer = 150;
+          playSound("sfx/abilities/gamble.wav");
           // resets slots
           for (int i = 0; i < arrGamble.length; i++) {
             arrGamble[i] = 0;
           }
         }
         // rolls slot machine
-        if (intDelayTimer % 20 == 0) {
+        if (intDelayTimer % 50 == 0) {
           gamble();
         }
       }
@@ -302,6 +312,7 @@ public class Sketch extends PApplet {
         if (intDelayTimer < 0) {
           intManaConsum = 150;
           intDelayTimer = 100;
+          playSound("sfx/abilities/freeze.wav");
         }
         // freezes targets
         for (int i = 0; i < arrListEnemy.size(); i++) {
@@ -342,6 +353,7 @@ public class Sketch extends PApplet {
         if (intDelayTimer < 0) {
           intManaConsum = 100;
           intDelayTimer = 100;
+          playSound("sfx/abilities/arrows.wav");
           // resets arrow positions
           for (int i = 0; i < intNumArrows; i++) {
             arrArrowsPosX[i] = random(width);
@@ -386,7 +398,7 @@ public class Sketch extends PApplet {
       for (int i2 = 0; i2 < arrListEnemy.size(); i2++) {
         ObjEnemy indivEnemy = arrListEnemy.get(i2);
         if (dist(arrArrowsPosX[i], arrArrowsPosY[i], indivEnemy.fltPosX, indivEnemy.fltPosY) < indivEnemy.fltDia * 2) {
-          indivEnemy.intHealth -= 5;
+          indivEnemy.intHealth -= 10;
           damageIndic(indivEnemy);
         }
       }
@@ -407,14 +419,24 @@ public class Sketch extends PApplet {
     if (arrGamble[2] != 0) {
       // 3 of a kind
       if (arrGamble[0] == arrGamble[1] && arrGamble[1] == arrGamble[2]) {
-        // damages all enemies
+        // immense damage to all enemies
         for (int i = 0; i < arrListEnemy.size(); i++) {
           ObjEnemy indivEnemy = arrListEnemy.get(i);
           indivEnemy.intHealth -= 5000;
+          damageIndic(indivEnemy);
         }
         // win vfx
         fill(255, 255, 0);
         slots = "$ | $ | $";
+      }
+      // lose
+      else {
+        // minimal damage to all enemies
+        for (int i = 0; i < arrListEnemy.size(); i++) {
+          ObjEnemy indivEnemy = arrListEnemy.get(i);
+          indivEnemy.intHealth -= 100;
+          damageIndic(indivEnemy);
+        }
       }
     }
     // using for each loops
@@ -468,7 +490,9 @@ public class Sketch extends PApplet {
     float bposX2 = 0;
     float bposY2 = 0;
     float space = fltSize / 10000;
-    // 1-5 main roots
+    // sfx: lightning
+    playSound("sfx/abilities/lightning.wav");
+    // vfx: 1-5 main roots
     for (int roots = 0; roots < random(1, 5); roots++) {
       rposX2 = rposX + random(-space, space);
       rposY2 = rposY + random(strikePosY / 3, strikePosY / 2);
@@ -476,11 +500,11 @@ public class Sketch extends PApplet {
       line(rposX, rposY, rposX2, rposY2);
       rposX = rposX2;
       rposY = rposY2;
-      // 1-3 branches
+      // vfx: 1-3 branches
       for (int branches = 0; branches < random(1, 3); branches++) {
         bposX = rposX;
         bposY = rposY;
-        // extending branch
+        // vfx: extending branch
         for (int extensions = 0; extensions < random(1, 5); extensions++) {
           bposX2 = bposX + random(-space, space);
           bposY2 = bposY + random(-space, space);
@@ -549,6 +573,29 @@ public class Sketch extends PApplet {
   */
   private void centerImage(PImage image, float posX, float posY) {
     image(image, posX - image.width / 2, posY - image.height / 2);
+  }
+
+  /**
+   * called on command
+   * plays sound
+   * @param fileName  .wav file to be played
+  */
+  public static void playSound(String filePath) {
+    try {
+      // open an audio input stream
+      File soundFile = new File(filePath);
+      AudioInputStream audioIn = AudioSystem.getAudioInputStream(soundFile);
+      // get a sound clip resource
+      Clip clip = AudioSystem.getClip();
+      // open audio clip
+      clip.open(audioIn);
+      // play audio clip
+      clip.start();
+    }
+    // error handling
+    catch (UnsupportedAudioFileException e) {e.printStackTrace();}
+    catch (IOException e) {e.printStackTrace();}
+    catch (LineUnavailableException e) {e.printStackTrace();}
   }
 
   /**
